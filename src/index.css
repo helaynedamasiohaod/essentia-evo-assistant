@@ -1,0 +1,63 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply box-border;
+  }
+
+  body {
+    @apply bg-bg-primary text-text-primary font-body antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display;
+  }
+
+  /* Evocare Scrollbar */
+  ::-webkit-scrollbar {
+    @apply w-2;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-bg-elevated;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-[#333] rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-[#555];
+  }
+}
+
+@layer components {
+  /* Evocare Card */
+  .card-evo {
+    @apply bg-bg-surface border border-[#333] rounded p-6 shadow-lg;
+  }
+
+  /* Evocare Button */
+  .btn-evo {
+    @apply px-6 py-3 bg-evo-gradient text-white rounded font-medium transition-all hover:opacity-90 hover:scale-105;
+  }
+
+  /* Evocare Input */
+  .input-evo {
+    @apply bg-bg-elevated border border-[#333] rounded px-4 py-2 text-text-primary focus:border-accent-purple focus:outline-none transition-colors;
+  }
+
+  /* Noise Texture */
+  .void-noise {
+    background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJhIj48ZmVUdXJidWxlbmNlIGJhc2VGcmVxdWVuY3k9Ii43NSIgc3RpdGNoVGlsZXM9InN0aXRjaCIgdHlwZT0iZnJhY3RhbE5vaXNlIi8+PGZlQ29sb3JNYXRyaXggdHlwZT0ic2F0dXJhdGUiIHZhbHVlcz0iMCIvPjwvZmlsdGVyPjxwYXRoIGQ9Ik0wIDBoMzAwdjMwMEgweiIgZmlsdGVyPSJ1cmwoI2EpIiBvcGFjaXR5PSIuMDUiLz48L3N2Zz4=');
+    @apply opacity-5 pointer-events-none;
+  }
+}
+
+@layer utilities {
+  .text-gradient-evo {
+    @apply bg-evo-gradient bg-clip-text text-transparent;
+  }
+}

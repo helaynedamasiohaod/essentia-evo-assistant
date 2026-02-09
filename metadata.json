@@ -1,0 +1,5 @@
+{
+  "name": "EssentIA - EVO Assistant",
+  "description": "An AI-powered agent to assist Behavioral Analysts in creating profound DISC Identity Feedback reports based on the EVO Methodology. It automates analysis, generates structured reports, and provides interactive scripts for feedback sessions.",
+  "requestFramePermissions": []
+}
