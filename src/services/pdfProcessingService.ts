@@ -216,41 +216,103 @@ export class PDFProcessingService {
   private static parseDISCData(text: string): Record<string, any> {
     console.log('🔍 Parsing DISC data...');
 
-    const upperText = text.toUpperCase();
-
-    // Procurar por padrões de percentuais (ex: "D 45%" ou "Dominância 45%")
-    const discPatterns = {
-      d: /(?:dominanc|domiuan|^\s*d\s*[:\-]?)\s*(\d+)\s*%/im,
-      i: /(?:influênc|influencia|^\s*i\s*[:\-]?)\s*(\d+)\s*%/im,
-      s: /(?:estabilid|estavilidade|^\s*s\s*[:\-]?)\s*(\d+)\s*%/im,
-      c: /(?:conformid|comformidade|^\s*c\s*[:\-]?)\s*(\d+)\s*%/im,
-    };
+    // Novo padrão: busca por "Perfil DOMINANTE: XX.XX%" ou "Perfil ANALÍTICO: XX.XX%"
+    const perfisPattern = /Perfil\s+(DOMINANTE|INFLUENTE|ESTÁVEL|ANALÍTICO)[:\s]*([0-9.]+)\s*%/gi;
 
     const scores = {
-      d: this.extractPercentage(text, discPatterns.d) || 40,
-      i: this.extractPercentage(text, discPatterns.i) || 35,
-      s: this.extractPercentage(text, discPatterns.s) || 50,
-      c: this.extractPercentage(text, discPatterns.c) || 40,
+      d: 0,
+      i: 0,
+      s: 0,
+      c: 0,
     };
+
+    let match;
+    while ((match = perfisPattern.exec(text)) !== null) {
+      const perfilName = match[1].toUpperCase();
+      const percentage = parseFloat(match[2]);
+
+      if (perfilName === 'DOMINANTE') scores.d = percentage;
+      else if (perfilName === 'INFLUENTE') scores.i = percentage;
+      else if (perfilName === 'ESTÁVEL') scores.s = percentage;
+      else if (perfilName === 'ANALÍTICO') scores.c = percentage;
+    }
+
+    // Se não encontrou pelos padrões novos, tenta os antigos como fallback
+    if (Object.values(scores).every(v => v === 0)) {
+      const discPatterns = {
+        d: /(?:dominanc|domiuan|^\s*d\s*[:\-]?)\s*(\d+(?:\.\d+)?)\s*%/im,
+        i: /(?:influênc|influencia|^\s*i\s*[:\-]?)\s*(\d+(?:\.\d+)?)\s*%/im,
+        s: /(?:estabilid|estavilidade|^\s*s\s*[:\-]?)\s*(\d+(?:\.\d+)?)\s*%/im,
+        c: /(?:conformid|comformidade|^\s*c\s*[:\-]?)\s*(\d+(?:\.\d+)?)\s*%/im,
+      };
+
+      scores.d = this.extractPercentage(text, discPatterns.d) || 0;
+      scores.i = this.extractPercentage(text, discPatterns.i) || 0;
+      scores.s = this.extractPercentage(text, discPatterns.s) || 0;
+      scores.c = this.extractPercentage(text, discPatterns.c) || 0;
+    }
+
+    // Se ainda não encontrou, usar defaults
+    if (Object.values(scores).every(v => v === 0)) {
+      scores.d = 40;
+      scores.i = 35;
+      scores.s = 50;
+      scores.c = 40;
+    }
 
     // DEBUG: Log extracted scores
     console.log('📊 DISC Scores Extracted:', scores);
-    console.log('   D (Dominância):', scores.d, '%');
-    console.log('   I (Influência):', scores.i, '%');
-    console.log('   S (Estabilidade):', scores.s, '%');
-    console.log('   C (Conformidade):', scores.c, '%');
+    console.log('   D (Dominante):', scores.d, '%');
+    console.log('   I (Influente):', scores.i, '%');
+    console.log('   S (Estável):', scores.s, '%');
+    console.log('   C (Analítico):', scores.c, '%');
 
-    // Encontrar perfil dominante
-    const dominantProfile = Object.entries(scores).reduce((a, b) =>
-      b[1] > a[1] ? b : a
-    )[0].toUpperCase();
+    // Encontrar perfil dominante (maior que 25% para ser considerado)
+    const relevantScores = Object.entries(scores).filter(([_, v]) => v >= 25);
+    let dominantProfile = '';
+
+    if (relevantScores.length > 0) {
+      dominantProfile = relevantScores
+        .sort((a, b) => b[1] - a[1])
+        .map(([key, _]) => {
+          if (key === 'd') return 'D';
+          if (key === 'i') return 'I';
+          if (key === 's') return 'S';
+          return 'C';
+        })
+        .join('');
+    } else {
+      dominantProfile = Object.entries(scores).reduce((a, b) =>
+        b[1] > a[1] ? b : a
+      )[0].toUpperCase();
+    }
+
+    // Mapeamento para nomes descritivos
+    const profileNames: Record<string, string> = {
+      'D': 'Dominante',
+      'I': 'Influente',
+      'S': 'Estável',
+      'C': 'Analítico',
+      'DC': 'Dominante Analítico',
+      'DI': 'Dominante Influente',
+      'DS': 'Dominante Estável',
+      'IC': 'Influente Analítico',
+      'IS': 'Influente Estável',
+      'SC': 'Estável Analítico',
+      'DIC': 'Dominante Influente Analítico',
+      'DIS': 'Dominante Influente Estável',
+      'DSC': 'Dominante Estável Analítico',
+      'ICS': 'Influente Analítico Estável',
+      'DISC': 'Balanceado',
+    };
 
     console.log('🎯 Dominant Profile:', dominantProfile);
 
     return {
-      profile: dominantProfile,
+      profile: profileNames[dominantProfile] || dominantProfile,
       scores,
       dominantProfile,
+      profileCode: dominantProfile,
       textLength: text.length,
       hasPercentages: Object.values(scores).some(v => v > 0),
     };
@@ -346,7 +408,7 @@ export class PDFProcessingService {
     try {
       const match = text.match(pattern);
       if (match && match[1]) {
-        const value = parseInt(match[1], 10);
+        const value = parseFloat(match[1]);
         return value >= 0 && value <= 100 ? value : null;
       }
     } catch (error) {
