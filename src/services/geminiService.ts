@@ -1,81 +1,182 @@
 import { DevolutivaData } from '@/types';
 
-// This is a mock service that simulates calling the Gemini API.
-// It returns a detailed, structured data object based on the user's name.
-// TODO: Replace with actual Gemini API call with proper error handling
+const API_KEY = import.meta.env.VITE_GOOGLE_API_KEY;
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
 
-export const generateDevolutiva = (subjectName: string): Promise<DevolutivaData> => {
+interface GeminiResponse {
+  candidates: Array<{
+    content: {
+      parts: Array<{
+        text: string;
+      }>;
+    };
+  }>;
+}
+
+// Parse JSON from Gemini response with fallback
+const parseGeminiResponse = (text: string) => {
+  try {
+    // Try to extract JSON from response (Gemini might wrap it in markdown)
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      return JSON.parse(jsonMatch[0]);
+    }
+    return null;
+  } catch (error) {
+    console.error('Error parsing Gemini response:', error);
+    return null;
+  }
+};
+
+// Generate structured prompt for DISC analysis
+const createAnalysisPrompt = (subjectName: string): string => {
+  return `Você é um especialista em análise DISC comportamental.
+
+Analise a pessoa chamada "${subjectName}" e crie uma devolutiva de identidade estruturada em JSON com a seguinte estrutura:
+
+{
+  "discProfile": { "d": <0-100>, "i": <0-100>, "s": <0-100>, "c": <0-100> },
+  "dominantProfile": "<D|I|S|C>",
+  "healthIndexes": [
+    { "name": "string", "value": "string", "diagnosis": "string", "impact": "string", "isAlert": boolean }
+  ],
+  "towerData": [
+    { "profile": "<D|I|S|C>", "selfPerception": <0-100>, "environmentDemand": <0-100> }
+  ],
+  "skills": [
+    { "name": "string", "type": "<expansion|retraction>" }
+  ],
+  "pyramid": {
+    "base": ["string", "string"],
+    "middle": ["string", "string"],
+    "top": "string"
+  },
+  "burnoutRisk": boolean,
+  "generatedContent": {
+    "rapport": "string",
+    "pizzaChartAnalysis": "string",
+    "towerChartAnalysis": "string",
+    "skillsAnalysis": "string",
+    "healthIndexAnalysis": "string",
+    "pyramidAnalysis": "string",
+    "internalWarDiagnosis": "string",
+    "smartTaskSuggestion": "string",
+    "finalImpactQuestion": "string",
+    "questions": {
+      "decrease": [
+        { "profile": "<D|I|S|C>", "question": "string" }
+      ],
+      "increase": [
+        { "profile": "<D|I|S|C>", "question": "string" }
+      ],
+      "expandSkill": [
+        { "skill": "string", "question": "string" }
+      ],
+      "retractSkill": [
+        { "skill": "string", "question": "string" }
+      ]
+    }
+  }
+}
+
+Retorne APENAS o JSON, sem explicações adicionais.`;
+};
+
+export const generateDevolutiva = async (subjectName: string): Promise<DevolutivaData> => {
   // Validate input
   if (!subjectName || typeof subjectName !== 'string') {
     return Promise.reject(new Error('Invalid subject name'));
   }
 
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      try {
-        const data: DevolutivaData = {
-        id: `devolutiva-${Date.now()}`,
-        subjectName,
-        date: new Date().toLocaleDateString('pt-BR'),
-        discProfile: { d: 75, i: 40, s: 85, c: 60 },
-        dominantProfile: 'S',
-        towerData: [
-          { profile: 'D', selfPerception: 50, environmentDemand: 70 }, // Increase
-          { profile: 'I', selfPerception: 60, environmentDemand: 50 }, // Decrease
-          { profile: 'S', selfPerception: 85, environmentDemand: 80 },
-          { profile: 'C', selfPerception: 55, environmentDemand: 75 }, // Increase
+  // Validate API Key
+  if (!API_KEY) {
+    console.error('VITE_GOOGLE_API_KEY is not configured');
+    return Promise.reject(new Error('API Key not configured. Please add VITE_GOOGLE_API_KEY to environment variables.'));
+  }
+
+  try {
+    console.log('Calling Gemini API for:', subjectName);
+
+    const response = await fetch(GEMINI_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [
+              {
+                text: createAnalysisPrompt(subjectName),
+              },
+            ],
+          },
         ],
-        healthIndexes: [
-          { name: 'Baixa Autoestima', value: 'IPS: 48% | IPM: 65%', diagnosis: 'Detectado', impact: 'Pode gerar insegurança na tomada de decisões e dificuldade em reconhecer as próprias conquistas.', isAlert: true },
-          { name: 'Filtro Social Elevado', value: 'IDA: 6%', diagnosis: 'Elevado', impact: 'Indica uma preocupação maior com a percepção externa do que com a autoexpressão autêntica.', isAlert: true },
-          { name: 'Interferência Externa', value: 'IIA: 18%', diagnosis: 'Dreno Energético', impact: 'O ambiente está exigindo adaptações que consomem uma quantidade significativa de energia.', isAlert: true },
-        ],
-        skills: [
-          { name: 'Comunicação Assertiva', type: 'expansion' },
-          { name: 'Delegação de Tarefas', type: 'expansion' },
-          { name: 'Gestão de Conflitos', type: 'expansion' },
-          { name: 'Perfeccionismo', type: 'retraction' },
-          { name: 'Centralização', type: 'retraction' },
-        ],
-        pyramid: {
-          base: ['Segurança e Estabilidade', 'Qualidade de Vida', 'Servir/Dedicar-se a uma causa'], // Anchors
-          middle: ['Prudência', 'Apreciação da Beleza', 'Gratidão', 'Humildade', 'Justiça'], // Strengths
-          top: 'Estabilidade (S)', // DISC
+        generationConfig: {
+          temperature: 0.7,
+          topK: 40,
+          topP: 0.95,
+          maxOutputTokens: 4096,
         },
-        burnoutRisk: false,
-        generatedContent: {
-            rapport: "O DISC, criado por William Moulton Marston, não é um rótulo, mas uma ferramenta para entender como você tende a se comportar em diferentes ambientes. As quatro dimensões são Dominância (D), Influência (I), Estabilidade (S) e Conformidade (C). Vamos explorar como essas energias se manifestam em você.",
-            pizzaChartAnalysis: `Seu perfil comportamental predominante é o de Estabilidade (S). Isso sugere uma tendência natural para ser uma pessoa planejadora, paciente e de bom suporte. Pessoas com alta Estabilidade valorizam a segurança, a lealdade e ambientes harmoniosos, sendo excelentes em rotinas e processos consistentes.`,
-            towerChartAnalysis: "O gráfico de torres revela uma dinâmica fascinante entre quem você percebe que é (verde) e o que o ambiente exige de você (azul). Vemos pontos de congruência, mas também áreas de adaptação que podem gerar tanto crescimento quanto desgaste. Vamos analisar os principais pontos de tensão e sinergia.",
-            skillsAnalysis: "No mapa de habilidades, você expressou o desejo de expandir sua Comunicação Assertiva e Delegação, enquanto busca retrair o Perfeccionismo. Isso indica um movimento consciente para otimizar sua forma de trabalho, buscando mais eficiência e menos sobrecarga.",
-            healthIndexAnalysis: "Os índices de saúde do perfil apontam para alguns pontos de atenção importantes. O 'Filtro Social Elevado' e a 'Interferência Externa' sugerem que o esforço para se adaptar ao meio está consumindo sua energia e talvez te distanciando de sua essência. A 'Baixa Autoestima' pode ser uma consequência desse processo.",
-            pyramidAnalysis: "Sua Pirâmide de Identidade é muito coerente. A base com a âncora de 'Segurança' sustenta suas forças de 'Prudência' e 'Justiça', que por sua vez se manifestam através do seu perfil de 'Estabilidade'. Seu 'porquê' (âncoras), 'como' (forças) e 'o quê' (DISC) estão alinhados.",
-            internalWarDiagnosis: `A sua 'guerra interna' parece ser travada entre a sua necessidade de segurança e planejamento (S) e a exigência do meio por mais Dominância (D) e Conformidade (C). Você está sendo chamado a ser mais diretivo e detalhista do que é naturalmente confortável para você. Esse esforço adaptativo, se não for bem gerenciado, pode levar a um dreno energético considerável, como aponta o seu índice de IIA.`,
-            smartTaskSuggestion: "Com base na nossa análise, um ponto de melhoria poderoso seria trabalhar a 'Comunicação Assertiva'. Que tal definirmos um pequeno passo para esta semana?",
-            finalImpactQuestion: "Por que valeu a pena receber esta Devolutiva de Identidade hoje?",
-            questions: {
-                decrease: [
-                    { profile: 'I', question: `De acordo com suas respostas, ${subjectName}, você demonstrou uma intenção de reduzir o perfil Influência (I). Em qual situação específica você sente que ser mais sociável e comunicativo pode ser prejudicial para você? Pode me dar um exemplo real do seu dia a dia?` }
-                ],
-                increase: [
-                    { profile: 'D', question: `Na sua percepção o ambiente ao seu redor está exigindo que você atue com mais Dominância (D). Em qual situação específica você percebe que agir de forma mais diretiva e focada em resultados pode ser benéfico? E em qual situação isso começa a te gerar desgaste?` },
-                    { profile: 'C', question: `O meio também parece exigir mais Conformidade (C). Em que momento ser mais detalhista, analítico e cuidadoso com as regras é vantajoso para você? E onde essa exigência se torna um peso?` }
-                ],
-                expandSkill: [
-                    { skill: 'Comunicação Assertiva', question: `Como aumentar a 'Comunicação Assertiva' te ajudaria neste momento atual da sua vida? Em qual área específica (trabalho, família, etc.) você sente que isso faria mais diferença hoje?` }
-                ],
-                retractSkill: [
-                    { skill: 'Perfeccionismo', question: `O que te levou a querer reduzir o 'Perfeccionismo'? Em que contexto essa força começa a deixar de ser funcional e se torna uma fonte de estresse ou lentidão para você?` }
-                ]
-            }
-        }
-      };
-        resolve(data);
-      } catch (error) {
-        const message = error instanceof Error ? error.message : 'Failed to generate devolutiva';
-        console.error('generateDevolutiva error:', error);
-        reject(new Error(message));
-      }
-    }, 1500);
-  });
+      }),
+    } as RequestInit & { headers: Record<string, string> });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('Gemini API error:', errorData);
+      throw new Error(`Gemini API error: ${response.status} - ${JSON.stringify(errorData)}`);
+    }
+
+    const data: GeminiResponse = await response.json();
+    const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+    if (!responseText) {
+      throw new Error('No response from Gemini API');
+    }
+
+    console.log('Gemini response received, parsing...');
+    const parsedContent = parseGeminiResponse(responseText);
+
+    if (!parsedContent) {
+      throw new Error('Failed to parse Gemini response');
+    }
+
+    // Construct complete DevolutivaData
+    const devolutiva: DevolutivaData = {
+      id: `devolutiva-${Date.now()}`,
+      subjectName,
+      date: new Date().toLocaleDateString('pt-BR'),
+      discProfile: parsedContent.discProfile || { d: 0, i: 0, s: 0, c: 0 },
+      dominantProfile: parsedContent.dominantProfile || 'D',
+      healthIndexes: parsedContent.healthIndexes || [],
+      towerData: parsedContent.towerData || [],
+      skills: parsedContent.skills || [],
+      pyramid: parsedContent.pyramid || { base: [], middle: [], top: '' },
+      burnoutRisk: parsedContent.burnoutRisk || false,
+      generatedContent: {
+        rapport: parsedContent.generatedContent?.rapport || '',
+        pizzaChartAnalysis: parsedContent.generatedContent?.pizzaChartAnalysis || '',
+        towerChartAnalysis: parsedContent.generatedContent?.towerChartAnalysis || '',
+        skillsAnalysis: parsedContent.generatedContent?.skillsAnalysis || '',
+        healthIndexAnalysis: parsedContent.generatedContent?.healthIndexAnalysis || '',
+        pyramidAnalysis: parsedContent.generatedContent?.pyramidAnalysis || '',
+        internalWarDiagnosis: parsedContent.generatedContent?.internalWarDiagnosis || '',
+        smartTaskSuggestion: parsedContent.generatedContent?.smartTaskSuggestion || '',
+        finalImpactQuestion: parsedContent.generatedContent?.finalImpactQuestion || '',
+        questions: parsedContent.generatedContent?.questions || {
+          decrease: [],
+          increase: [],
+          expandSkill: [],
+          retractSkill: [],
+        },
+      },
+    };
+
+    console.log('Devolutiva generated successfully for:', subjectName);
+    return devolutiva;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to generate devolutiva';
+    console.error('generateDevolutiva error:', error);
+    throw new Error(message);
+  }
 };
