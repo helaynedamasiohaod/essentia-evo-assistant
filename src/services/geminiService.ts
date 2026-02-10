@@ -1,7 +1,8 @@
 import { DevolutivaData } from '@/types';
 
 const API_KEY = import.meta.env.VITE_GOOGLE_API_KEY;
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+const GEMINI_MODEL = 'gemini-1.5-flash';
+const getGeminiApiUrl = () => `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${API_KEY}`;
 
 interface GeminiResponse {
   candidates: Array<{
@@ -97,7 +98,7 @@ export const generateDevolutiva = async (subjectName: string): Promise<Devolutiv
   try {
     console.log('Calling Gemini API for:', subjectName);
 
-    const response = await fetch(GEMINI_API_URL, {
+    const response = await fetch(getGeminiApiUrl(), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
