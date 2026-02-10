@@ -1,0 +1,232 @@
+id: essentia-review-squad
+name: EssentIA Review & Viability Squad
+version: '1.0.0'
+description: Equipe especializada em revisão crítica de código, arquitetura e viabilidade do projeto EssentIA EVO Assistant
+created_at: '2026-02-09'
+updated_at: '2026-02-09'
+
+# Squad metadata
+metadata:
+  purpose: 'code-review-and-viability-assessment'
+  scope: 'Full-stack React/TypeScript application with Design System'
+  duration: 'Variable (2-4 hours for complete review)'
+  status: 'active'
+
+# Lead agent (orchestrator)
+lead_agent: architect
+lead_agent_role: 'Strategy & Architecture Lead'
+
+# Squad composition
+agents:
+  - id: architect
+    name: Atlas
+    role: 'Solutions Architect'
+    responsibility: 'Architecture review, scalability assessment, design patterns'
+    expertise:
+      - System architecture
+      - Technology stack evaluation
+      - Scalability analysis
+      - Design patterns
+      - Performance optimization
+
+  - id: dev
+    name: Dex
+    role: 'Code Quality Lead'
+    responsibility: 'Code review, implementation patterns, best practices'
+    expertise:
+      - Code quality assessment
+      - TypeScript best practices
+      - React patterns and hooks
+      - Performance optimization
+      - Security vulnerabilities
+
+  - id: qa
+    name: Quinn
+    role: 'Quality & Testing Lead'
+    responsibility: 'Test coverage, quality metrics, edge cases'
+    expertise:
+      - Testing strategy
+      - Coverage analysis
+      - Edge case identification
+      - Quality metrics
+      - Regression risks
+
+  - id: ux-design-expert
+    name: Luna
+    role: 'UX/UI Design Lead'
+    responsibility: 'Design consistency, user experience, accessibility'
+    expertise:
+      - Design system consistency
+      - User experience evaluation
+      - Accessibility compliance
+      - Visual hierarchy
+      - Component consistency
+
+  - id: analyst
+    name: Aurora
+    role: 'Product & Market Analysis'
+    responsibility: 'Market viability, product strategy, competitive analysis'
+    expertise:
+      - Market research
+      - Product-market fit
+      - Competitive analysis
+      - User research synthesis
+      - Business viability
+
+  - id: devops
+    name: Gage
+    role: 'Infrastructure & Deployment Lead'
+    responsibility: 'Deployment readiness, infrastructure, CI/CD'
+    expertise:
+      - Deployment strategies
+      - Infrastructure requirements
+      - Environment configuration
+      - Build optimization
+      - Scaling considerations
+
+# Review areas
+review_areas:
+  - id: codebase
+    name: 'Codebase Quality'
+    owner: dev
+    sub_areas:
+      - TypeScript type safety
+      - Code organization and structure
+      - Component design patterns
+      - Service layer implementation
+      - Error handling and logging
+
+  - id: architecture
+    name: 'System Architecture'
+    owner: architect
+    sub_areas:
+      - Project structure and scalability
+      - Dependency management
+      - Technology stack appropriateness
+      - Performance bottlenecks
+      - Future extensibility
+
+  - id: testing
+    name: 'Testing & Quality'
+    owner: qa
+    sub_areas:
+      - Test coverage analysis
+      - Testing strategy
+      - Quality metrics
+      - Performance testing
+      - Security testing
+
+  - id: design
+    name: 'Design System & UX'
+    owner: ux-design-expert
+    sub_areas:
+      - Design system consistency
+      - Component accessibility
+      - Responsive design
+      - Visual design quality
+      - User experience flow
+
+  - id: viability
+    name: 'Product Viability'
+    owner: analyst
+    sub_areas:
+      - Market alignment
+      - Feature completeness
+      - User needs satisfaction
+      - Competitive positioning
+      - Go-to-market readiness
+
+  - id: deployment
+    name: 'Deployment Readiness'
+    owner: devops
+    sub_areas:
+      - Build process optimization
+      - Environment configuration
+      - Performance optimization
+      - Security hardening
+      - Scaling strategy
+
+# Key deliverables
+deliverables:
+  - Comprehensive Review Report (Markdown)
+  - Architecture Assessment Document
+  - Code Quality Report with Findings
+  - Test Coverage Analysis
+  - Design System Evaluation
+  - Viability Assessment & Recommendations
+  - Improvement Roadmap (Prioritized)
+  - Risk Matrix
+
+# Success criteria
+success_criteria:
+  - All areas reviewed with concrete findings
+  - Critical issues identified and documented
+  - Recommendations provided with priorities
+  - Clear action items for improvement
+  - Risk assessment completed
+  - Roadmap for next phases established
+
+# Timeline
+phases:
+  - name: 'Phase 1: Initial Assessment'
+    duration: '30 minutes'
+    agents: [architect, analyst]
+    output: 'Scope confirmation and assessment plan'
+
+  - name: 'Phase 2: Codebase & Architecture Review'
+    duration: '60 minutes'
+    agents: [dev, architect]
+    output: 'Code quality and architecture findings'
+
+  - name: 'Phase 3: Quality & Testing Review'
+    duration: '45 minutes'
+    agents: [qa, devops]
+    output: 'Testing strategy and deployment readiness'
+
+  - name: 'Phase 4: Design & UX Review'
+    duration: '30 minutes'
+    agents: [ux-design-expert]
+    output: 'Design consistency and UX recommendations'
+
+  - name: 'Phase 5: Viability & Market Analysis'
+    duration: '30 minutes'
+    agents: [analyst]
+    output: 'Viability assessment and market positioning'
+
+  - name: 'Phase 6: Report Generation'
+    duration: '30 minutes'
+    agents: [architect]
+    output: 'Comprehensive review report and roadmap'
+
+# Output format
+output_format:
+  - type: 'summary_report'
+    location: 'docs/REVIEW_SUMMARY.md'
+
+  - type: 'detailed_findings'
+    location: 'docs/REVIEW_DETAILED_FINDINGS.md'
+
+  - type: 'improvement_roadmap'
+    location: 'docs/IMPROVEMENT_ROADMAP.md'
+
+  - type: 'risk_assessment'
+    location: 'docs/RISK_ASSESSMENT.md'
+
+tags:
+  - review
+  - viability
+  - architecture
+  - code-quality
+  - testing
+  - design-system
+  - deployment
+  - market-analysis
+
+keywords:
+  - EssentIA EVO Assistant
+  - React
+  - TypeScript
+  - Design System
+  - Full-stack review
+  - Quality assessment
+  - Go-to-market readiness

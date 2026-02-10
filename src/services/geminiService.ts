@@ -1,12 +1,19 @@
-import { DevolutivaData } from '../types';
+import { DevolutivaData } from '@/types';
 
 // This is a mock service that simulates calling the Gemini API.
 // It returns a detailed, structured data object based on the user's name.
+// TODO: Replace with actual Gemini API call with proper error handling
 
 export const generateDevolutiva = (subjectName: string): Promise<DevolutivaData> => {
-  return new Promise(resolve => {
+  // Validate input
+  if (!subjectName || typeof subjectName !== 'string') {
+    return Promise.reject(new Error('Invalid subject name'));
+  }
+
+  return new Promise((resolve, reject) => {
     setTimeout(() => {
-      const data: DevolutivaData = {
+      try {
+        const data: DevolutivaData = {
         id: `devolutiva-${Date.now()}`,
         subjectName,
         date: new Date().toLocaleDateString('pt-BR'),
@@ -63,7 +70,12 @@ export const generateDevolutiva = (subjectName: string): Promise<DevolutivaData>
             }
         }
       };
-      resolve(data);
+        resolve(data);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Failed to generate devolutiva';
+        console.error('generateDevolutiva error:', error);
+        reject(new Error(message));
+      }
     }, 1500);
   });
 };

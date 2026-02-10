@@ -13,10 +13,16 @@ const App: React.FC = () => {
   const [activeScreen, setActiveScreen] = useState<Screen>(Screen.UPLOAD);
   const [devolutivaData, setDevolutivaData] = useState<DevolutivaData | null>(null);
   const [history, setHistory] = useState<DevolutivaData[]>(() => {
-    const saved = localStorage.getItem('devolutivaHistory');
-    return saved ? JSON.parse(saved) : [];
+    try {
+      const saved = localStorage.getItem('devolutivaHistory');
+      return saved ? JSON.parse(saved) : [];
+    } catch (error) {
+      console.error('Failed to load history from localStorage:', error);
+      return [];
+    }
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleAnalysisComplete = useCallback((data: DevolutivaData) => {
     setDevolutivaData(data);
@@ -28,10 +34,25 @@ const App: React.FC = () => {
   }, [history]);
 
   const handleStartAnalysis = async (subjectName: string) => {
+    // Input validation
+    if (!subjectName?.trim()) {
+      setError('Please enter a name');
+      return;
+    }
+
     setIsLoading(true);
-    // In a real app, you'd pass the files here
-    const data = await generateDevolutiva(subjectName);
-    handleAnalysisComplete(data);
+    setError(null);
+
+    try {
+      // In a real app, you'd pass the files here
+      const data = await generateDevolutiva(subjectName);
+      handleAnalysisComplete(data);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to generate analysis';
+      console.error('Analysis error:', err);
+      setError(errorMessage);
+      setIsLoading(false);
+    }
   };
   
   const handleSelectHistory = (data: DevolutivaData) => {
@@ -40,6 +61,24 @@ const App: React.FC = () => {
   };
 
   const renderScreen = () => {
+    // Show error message if present
+    if (error && activeScreen === Screen.UPLOAD) {
+      return (
+        <>
+          <div
+            role="alert"
+            aria-live="polite"
+            aria-atomic="true"
+            className="mb-4 p-4 bg-red-900/20 border border-red-700 rounded-lg text-red-400 focus:outline-none focus:ring-2 focus:ring-red-500"
+          >
+            <p className="font-semibold">Erro ao processar</p>
+            <p>{error}</p>
+          </div>
+          <UploadScreen onStartAnalysis={handleStartAnalysis} isLoading={isLoading} />
+        </>
+      );
+    }
+
     switch (activeScreen) {
       case Screen.UPLOAD:
         return <UploadScreen onStartAnalysis={handleStartAnalysis} isLoading={isLoading} />;

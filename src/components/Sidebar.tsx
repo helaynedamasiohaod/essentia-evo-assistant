@@ -24,12 +24,15 @@ const Sidebar: React.FC<SidebarProps> = ({ activeScreen, setActiveScreen }) => {
           <div className="text-gradient-evo text-2xl font-display font-bold">EVO</div>
           <h1 className="font-display text-xl font-bold hidden md:block text-text-primary">Assistant</h1>
         </div>
-        <ul>
+        <ul role="navigation">
           {navItems.map((item) => (
             <li key={item.screen}>
               <button
                 onClick={() => setActiveScreen(item.screen)}
-                className={`w-full flex items-center gap-3 p-3 my-1 rounded transition-colors duration-200 ${
+                aria-label={item.label}
+                aria-current={activeScreen === item.screen ? 'page' : undefined}
+                title={item.label}
+                className={`w-full flex items-center gap-3 p-3 my-1 rounded transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-accent-purple ${
                   activeScreen === item.screen
                     ? 'bg-evo-gradient text-white'
                     : 'text-text-secondary hover:text-text-primary hover:bg-bg-surface'

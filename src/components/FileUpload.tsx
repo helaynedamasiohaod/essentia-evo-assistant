@@ -53,6 +53,14 @@ const FileUpload: React.FC<FileUploadProps> = ({ label, onFileSelect }) => {
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      const inputElement = document.getElementById(`file-upload-${label}`) as HTMLInputElement;
+      inputElement?.click();
+    }
+  };
+
   return (
     <div className="w-full">
       <label className="block text-sm font-medium text-text-secondary mb-2">{label}</label>
@@ -61,7 +69,11 @@ const FileUpload: React.FC<FileUploadProps> = ({ label, onFileSelect }) => {
         onDragLeave={onDragLeave}
         onDragOver={onDragOver}
         onDrop={onDrop}
-        className={`relative flex justify-center items-center w-full h-32 px-6 pt-5 pb-6 border-2 border-dashed rounded transition-colors duration-200 ${
+        onKeyDown={handleKeyDown}
+        role="button"
+        tabIndex={0}
+        aria-label={`Drag and drop PDF file or click to ${file ? 'replace' : 'upload'}`}
+        className={`relative flex justify-center items-center w-full h-32 px-6 pt-5 pb-6 border-2 border-dashed rounded transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-accent-purple focus:ring-offset-2 ${
           isDragging ? 'border-accent-teal bg-bg-surface' : 'border-[#333] hover:border-[#555]'
         }`}
       >
@@ -79,7 +91,8 @@ const FileUpload: React.FC<FileUploadProps> = ({ label, onFileSelect }) => {
             <p className="mt-2 text-sm font-semibold">{file.name}</p>
             <button
                 onClick={() => handleFileChange(null)}
-                className="mt-1 text-xs text-accent-orange hover:opacity-80"
+                aria-label={`Remove ${file.name}`}
+                className="mt-1 text-xs text-accent-orange hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-accent-orange rounded px-2 py-1 transition-opacity"
             >
                 Remover
             </button>
