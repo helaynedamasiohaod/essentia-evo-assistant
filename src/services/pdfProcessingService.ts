@@ -1,8 +1,16 @@
 import { PDFExtractionResult, PDFUploadData, BatchProcessResult } from '@/types/devolutiva';
 import * as pdfjsLib from 'pdfjs-dist';
 
-// Setup PDF.js worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+// CRITICAL FIX: Setup PDF.js worker properly for production
+// The CDN path doesn't work reliably in Vercel. Use the bundled worker instead.
+try {
+  if (typeof window !== 'undefined') {
+    // Browser environment - try to load worker from node_modules
+    pdfjsLib.GlobalWorkerOptions.workerSrc = `/pdf.worker.min.js`;
+  }
+} catch (err) {
+  console.error('Failed to setup PDF worker:', err);
+}
 
 export class PDFProcessingService {
   /**
@@ -11,10 +19,16 @@ export class PDFProcessingService {
   static async extractDISCProfile(file: File): Promise<PDFExtractionResult> {
     try {
       const text = await this.extractTextFromPDF(file);
+      
+      if (!text || text.trim().length === 0) {
+        throw new Error('PDF file appears to be empty or unreadable');
+      }
+      
       const extractedData = this.parseDISCData(text);
       const confidence = this.calculateConfidence(text, 'DISC');
 
       console.log(`✅ DISC extracted from ${file.name} (confidence: ${(confidence * 100).toFixed(1)}%)`);
+      console.log(`   Text extracted: ${text.length} characters`);
 
       return {
         type: 'DISC',
@@ -23,7 +37,9 @@ export class PDFProcessingService {
         confidence,
       };
     } catch (error) {
-      throw new Error(`Failed to extract DISC profile: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      console.error(`❌ Failed to extract DISC profile:`, message);
+      throw new Error(`Failed to extract DISC profile: ${message}`);
     }
   }
 
@@ -33,10 +49,16 @@ export class PDFProcessingService {
   static async extractAnchors(file: File): Promise<PDFExtractionResult> {
     try {
       const text = await this.extractTextFromPDF(file);
+      
+      if (!text || text.trim().length === 0) {
+        throw new Error('PDF file appears to be empty or unreadable');
+      }
+      
       const extractedData = this.parseAnchorsData(text);
       const confidence = this.calculateConfidence(text, 'ANCHORS');
 
       console.log(`✅ Anchors extracted from ${file.name} (confidence: ${(confidence * 100).toFixed(1)}%)`);
+      console.log(`   Text extracted: ${text.length} characters`);
 
       return {
         type: 'ANCHORS',
@@ -45,7 +67,9 @@ export class PDFProcessingService {
         confidence,
       };
     } catch (error) {
-      throw new Error(`Failed to extract anchors: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      console.error(`❌ Failed to extract anchors:`, message);
+      throw new Error(`Failed to extract anchors: ${message}`);
     }
   }
 
@@ -55,10 +79,16 @@ export class PDFProcessingService {
   static async extractStrengths(file: File): Promise<PDFExtractionResult> {
     try {
       const text = await this.extractTextFromPDF(file);
+      
+      if (!text || text.trim().length === 0) {
+        throw new Error('PDF file appears to be empty or unreadable');
+      }
+      
       const extractedData = this.parseStrengthsData(text);
       const confidence = this.calculateConfidence(text, 'STRENGTHS');
 
       console.log(`✅ Strengths extracted from ${file.name} (confidence: ${(confidence * 100).toFixed(1)}%)`);
+      console.log(`   Text extracted: ${text.length} characters`);
 
       return {
         type: 'STRENGTHS',
@@ -67,7 +97,9 @@ export class PDFProcessingService {
         confidence,
       };
     } catch (error) {
-      throw new Error(`Failed to extract strengths: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      console.error(`❌ Failed to extract strengths:`, message);
+      throw new Error(`Failed to extract strengths: ${message}`);
     }
   }
 
@@ -77,10 +109,16 @@ export class PDFProcessingService {
   static async extractLanguages(file: File): Promise<PDFExtractionResult> {
     try {
       const text = await this.extractTextFromPDF(file);
+      
+      if (!text || text.trim().length === 0) {
+        throw new Error('PDF file appears to be empty or unreadable');
+      }
+      
       const extractedData = this.parseLanguagesData(text);
       const confidence = this.calculateConfidence(text, 'LANGUAGES');
 
       console.log(`✅ Languages extracted from ${file.name} (confidence: ${(confidence * 100).toFixed(1)}%)`);
+      console.log(`   Text extracted: ${text.length} characters`);
 
       return {
         type: 'LANGUAGES',
@@ -89,24 +127,48 @@ export class PDFProcessingService {
         confidence,
       };
     } catch (error) {
-      throw new Error(`Failed to extract languages: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      console.error(`❌ Failed to extract languages:`, message);
+      throw new Error(`Failed to extract languages: ${message}`);
     }
   }
 
   /**
    * Extrair texto bruto do PDF usando pdfjs-dist
    * IMPLEMENTAÇÃO REAL: Lê cada página do PDF e extrai todo o texto
+   * 
+   * CRITICAL: This MUST use real PDF extraction before any AI processing
    */
   private static async extractTextFromPDF(file: File): Promise<string> {
     try {
       console.log(`📄 Extracting text from ${file.name}...`);
 
+      // Validate file
+      if (!file || file.type !== 'application/pdf') {
+        throw new Error('Invalid file: must be a PDF');
+      }
+
+      if (file.size === 0) {
+        throw new Error('PDF file is empty');
+      }
+
+      console.log(`   File size: ${(file.size / 1024).toFixed(2)} KB`);
+
       const arrayBuffer = await file.arrayBuffer();
+      
+      if (!arrayBuffer || arrayBuffer.byteLength === 0) {
+        throw new Error('Failed to read PDF file data');
+      }
+
+      console.log(`   Loading PDF with pdfjs-dist...`);
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+
+      console.log(`   PDF loaded: ${pdf.numPages} pages`);
 
       let fullText = '';
       const pageCount = pdf.numPages;
 
+      // Extract text from each page
       for (let pageNum = 1; pageNum <= pageCount; pageNum++) {
         try {
           const page = await pdf.getPage(pageNum);
@@ -115,7 +177,7 @@ export class PDFProcessingService {
           // Extrair texto de cada item na página
           const pageText = textContent.items
             .map((item: any) => {
-              if (item.str) {
+              if (item && item.str) {
                 return item.str;
               }
               return '';
@@ -123,22 +185,27 @@ export class PDFProcessingService {
             .join(' ')
             .trim();
 
-          fullText += pageText + '\n\n';
-
-          console.log(`  Page ${pageNum}/${pageCount}: ${pageText.substring(0, 50)}...`);
+          if (pageText.length > 0) {
+            fullText += pageText + '\n\n';
+            console.log(`   ✓ Page ${pageNum}/${pageCount}: ${pageText.substring(0, 100).replace(/\n/g, ' ')}...`);
+          }
         } catch (pageError) {
-          console.warn(`  Warning: Could not extract page ${pageNum}: ${pageError}`);
+          console.warn(`   ⚠️  Warning: Could not extract page ${pageNum}: ${pageError}`);
+          // Continue with next page instead of failing
         }
       }
 
+      // Final validation
       if (!fullText || fullText.trim().length === 0) {
-        throw new Error('No text could be extracted from PDF');
+        throw new Error('PDF exists but contains no extractable text. This might be a scanned/image-based PDF.');
       }
 
-      console.log(`✨ Text extraction complete. Total: ${fullText.length} characters`);
+      console.log(`✨ Text extraction complete. Total: ${fullText.length} characters extracted`);
       return fullText;
     } catch (error) {
-      throw new Error(`Failed to extract text from PDF: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      console.error(`❌ PDF extraction failed:`, message);
+      throw new Error(`Failed to extract text from PDF: ${message}`);
     }
   }
 
@@ -335,7 +402,9 @@ export class PDFProcessingService {
         processedAt: new Date(),
       };
     } catch (error) {
-      throw new Error(`Failed to process PDFs: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      console.error(`❌ Failed to process PDFs:`, message);
+      throw new Error(`Failed to process PDFs: ${message}`);
     }
   }
 
