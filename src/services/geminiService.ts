@@ -24,8 +24,8 @@ const getDominantProfile = (profile: { d: number; i: number; s: number; c: numbe
 
 export const generateDevolutiva = async (subjectName: string): Promise<DevolutivaData> => {
   // Validate input
-  if (!subjectName || typeof subjectName !== 'string') {
-    return Promise.reject(new Error('Invalid subject name'));
+  if (!subjectName || typeof subjectName !== 'string' || subjectName.trim().length === 0) {
+    throw new Error('Invalid subject name');
   }
 
   try {
