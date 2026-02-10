@@ -1,7 +1,7 @@
 import { DevolutivaData } from '@/types';
 
 const API_KEY = import.meta.env.VITE_GOOGLE_API_KEY;
-const GEMINI_MODEL = 'gemini-pro';
+const GEMINI_MODEL = 'gemini-1.5-flash';
 const getGeminiApiUrl = () => `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${API_KEY}`;
 
 interface GeminiResponse {
