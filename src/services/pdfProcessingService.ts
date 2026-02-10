@@ -233,10 +233,19 @@ export class PDFProcessingService {
       c: this.extractPercentage(text, discPatterns.c) || 40,
     };
 
+    // DEBUG: Log extracted scores
+    console.log('📊 DISC Scores Extracted:', scores);
+    console.log('   D (Dominância):', scores.d, '%');
+    console.log('   I (Influência):', scores.i, '%');
+    console.log('   S (Estabilidade):', scores.s, '%');
+    console.log('   C (Conformidade):', scores.c, '%');
+
     // Encontrar perfil dominante
     const dominantProfile = Object.entries(scores).reduce((a, b) =>
       b[1] > a[1] ? b : a
     )[0].toUpperCase();
+
+    console.log('🎯 Dominant Profile:', dominantProfile);
 
     return {
       profile: dominantProfile,
