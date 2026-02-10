@@ -1,0 +1,327 @@
+squad:
+  name: essentia-devolutiva-completa
+  version: 1.0.0
+  description: "Sistema Completo de Devolutiva de Identidade EssentIA - 15 Passos"
+
+  metadata:
+    author: "Helayne Damasio"
+    created: "2026-02-10"
+    complexity: "high"
+    parallelization: true
+    estimated_duration: "3 horas"
+
+  mission: |
+    Processar relatórios de pesquisa comportamental (DISC, Âncoras, Forças, Linguagens)
+    e gerar um roteiro detalhado para Sessão de Devolutiva de Identidade em 15 passos,
+    com saída em PDF e Slides para apresentação profissional.
+
+# AGENTS (Execução Paralela)
+agents:
+  - name: dev
+    id: dev
+    role: "Backend Developer"
+    responsibility: |
+      Implementar serviços de processamento:
+      - PDF extraction (DISC, Âncoras, Forças, Linguagens)
+      - 15 Steps orchestration
+      - 9 Index calculation
+      - Correlation engine
+      - Output generation (PDF/Slides)
+
+    tasks:
+      - "Create PDF processing service"
+      - "Implement 15-step analysis flow"
+      - "Build index calculation engine"
+      - "Create correlation algorithm"
+      - "Generate PDF/Slides outputs"
+
+    dependencies: []
+    start_on: "immediate"
+
+  - name: ux-design-expert
+    id: ux-design-expert
+    role: "UX/UI Designer"
+    responsibility: |
+      Design interface para os 15 passos:
+      - Upload screen (4 PDFs)
+      - Step-by-step navigation
+      - Data visualization (charts, graphs)
+      - Form validation
+      - Visual hierarchy for insights
+
+    tasks:
+      - "Design 15-step UI flow"
+      - "Create component specs"
+      - "Design data visualizations"
+      - "Wireframe upload interface"
+      - "Plan accessibility (WCAG)"
+
+    dependencies: []
+    start_on: "immediate"
+
+  - name: qa
+    id: qa
+    role: "QA & Test Architect"
+    responsibility: |
+      Garantir qualidade do sistema:
+      - Test strategy para 15 passos
+      - PDF extraction validation
+      - Index calculation accuracy
+      - Correlation logic verification
+      - Integration tests
+
+    tasks:
+      - "Create test strategy"
+      - "Design test cases for 15 steps"
+      - "Setup automated testing"
+      - "Validate PDF parsing"
+      - "Performance testing"
+
+    dependencies: []
+    start_on: "immediate"
+
+  - name: devops
+    id: devops
+    role: "DevOps & Infrastructure"
+    responsibility: |
+      Setup build & deployment:
+      - CI/CD pipeline
+      - Build optimization
+      - Artifact management
+      - Environment configuration
+      - Monitoring setup
+
+    tasks:
+      - "Configure GitHub Actions"
+      - "Setup artifact pipeline"
+      - "Configure Vercel deployment"
+      - "Setup monitoring"
+      - "Create deployment checklist"
+
+    dependencies: []
+    start_on: "immediate"
+
+# TRACKS (Execução Paralela em 3 Sprints)
+execution_tracks:
+  sprint_1_foundations:
+    duration: "1 hora"
+    parallel_agents: ["dev", "ux-design-expert", "qa", "devops"]
+
+    tasks:
+      dev:
+        - task: "Define TypeScript types for DevolutivaCompleta"
+          description: "Create interfaces for all 15 steps"
+          deliverable: "src/types/devolutiva.ts"
+
+        - task: "Setup PDF processing infrastructure"
+          description: "Install pdfjs-dist, setup extraction utils"
+          deliverable: "src/services/pdfProcessingService.ts (skeleton)"
+
+      ux-design-expert:
+        - task: "Design 15-step user flow"
+          description: "Wireframes + component breakdown"
+          deliverable: "designs/15-step-flow.pdf"
+
+        - task: "Create component specifications"
+          description: "Button styles, form layouts, charts"
+          deliverable: "designs/component-specs.md"
+
+      qa:
+        - task: "Create comprehensive test strategy"
+          description: "Test matrix for all 15 steps"
+          deliverable: "docs/qa/test-strategy.md"
+
+        - task: "Design test fixtures"
+          description: "Mock PDFs, test data"
+          deliverable: "src/__tests__/fixtures/"
+
+      devops:
+        - task: "Configure GitHub Actions for PDF processing"
+          description: "Add lib dependencies to workflow"
+          deliverable: ".github/workflows/ci.yml (update)"
+
+        - task: "Setup artifact pipeline"
+          description: "PDF/Slides as build artifacts"
+          deliverable: ".github/workflows/artifacts.yml"
+
+  sprint_2_implementation:
+    duration: "1.5 horas"
+    parallel_agents: ["dev", "ux-design-expert", "qa", "devops"]
+    depends_on: "sprint_1_foundations"
+
+    tasks:
+      dev:
+        - task: "Implement PDF extraction for all 4 PDFs"
+          description: "Extract DISC, Âncoras, Forças, Linguagens data"
+          deliverable: "src/services/pdfProcessingService.ts (complete)"
+
+        - task: "Build 15-step orchestration service"
+          description: "Phase I-IV flow control"
+          deliverable: "src/services/devolutivaAnalysisService.ts"
+
+        - task: "Implement 9 index calculations"
+          description: "AEM, APF, IPS, IDA, IPM + others"
+          deliverable: "src/services/indexCalculationService.ts"
+
+        - task: "Build correlation engine"
+          description: "Perfil + Âncoras + Forças + Linguagens"
+          deliverable: "src/services/correlationService.ts"
+
+      ux-design-expert:
+        - task: "Create PDFUploadModal component"
+          description: "4-file upload with validation"
+          deliverable: "src/components/PDFUploadModal.tsx"
+
+        - task: "Build StepByStep container"
+          description: "Navigation + progress tracking"
+          deliverable: "src/components/DevolutivaStepByStep.tsx"
+
+        - task: "Design visualization components"
+          description: "Charts, graphs, data tables"
+          deliverable: "src/components/Visualizations.tsx"
+
+      qa:
+        - task: "Implement PDF extraction tests"
+          description: "Validate data parsing accuracy"
+          deliverable: "src/__tests__/services/pdfProcessing.test.ts"
+
+        - task: "Create index calculation tests"
+          description: "Verify all 9 indices"
+          deliverable: "src/__tests__/services/indexCalculation.test.ts"
+
+      devops:
+        - task: "Add PDF processing libs to dependencies"
+          description: "pdfjs-dist, pdfkit, pptxgen"
+          deliverable: "package.json (updated)"
+
+        - task: "Setup performance monitoring"
+          description: "PDF processing benchmarks"
+          deliverable: ".github/workflows/performance.yml"
+
+  sprint_3_output:
+    duration: "1 hora"
+    parallel_agents: ["dev", "ux-design-expert", "qa", "devops"]
+    depends_on: "sprint_2_implementation"
+
+    tasks:
+      dev:
+        - task: "Implement PDF output generation"
+          description: "Generate PDF with all 15 steps"
+          deliverable: "src/services/pdfOutputService.ts"
+
+        - task: "Implement Slides output generation"
+          description: "Generate PPTX presentation"
+          deliverable: "src/services/slidesOutputService.ts"
+
+        - task: "Build SMART Task builder"
+          description: "Ação + Prazo + Mensuração + Celebração"
+          deliverable: "src/services/smartTaskService.ts"
+
+        - task: "Integration & final tests"
+          description: "End-to-end testing"
+          deliverable: "src/__tests__/integration/"
+
+      ux-design-expert:
+        - task: "Create final UI components"
+          description: "All 15 step screens"
+          deliverable: "src/screens/DevolutiveSteps/*"
+
+        - task: "Implement accessibility"
+          description: "WCAG AA compliance"
+          deliverable: "src/ (ARIA labels, keyboard nav)"
+
+      qa:
+        - task: "Run full regression tests"
+          description: "All 15 steps + outputs"
+          deliverable: "test-reports/"
+
+        - task: "Validate output generation"
+          description: "PDF/Slides quality check"
+          deliverable: "src/__tests__/services/output.test.ts"
+
+      devops:
+        - task: "Final deployment validation"
+          description: "Test production build"
+          deliverable: "deployment-checklist.md"
+
+        - task: "Setup monitoring"
+          description: "Error tracking, performance"
+          deliverable: "monitoring-config.json"
+
+# WORKFLOWS (Multistep processes)
+workflows:
+  - name: "devolutiva-complete"
+    description: "15-step complete identity feedback workflow"
+    steps:
+      1: "PDF Upload & Validation"
+      2: "Data Extraction"
+      3: "15-Step Processing"
+      4: "Index Calculation"
+      5: "Correlation Analysis"
+      6: "PDF Generation"
+      7: "Slides Generation"
+      8: "Download & Archive"
+
+# DELIVERABLES
+deliverables:
+  phase_1:
+    - "Types definitions (DevolutivaCompleta interface)"
+    - "UI wireframes (15 steps)"
+    - "Test strategy document"
+    - "CI/CD configuration"
+
+  phase_2:
+    - "PDF processing service (complete)"
+    - "15-step orchestration service"
+    - "Index calculation engine"
+    - "Correlation algorithm"
+    - "UI components (upload + navigation)"
+    - "Unit tests for services"
+    - "Performance benchmarks"
+
+  phase_3:
+    - "PDF output generator"
+    - "Slides output generator"
+    - "SMART task builder"
+    - "Final UI screens (all 15 steps)"
+    - "Integration tests"
+    - "WCAG AA accessibility"
+    - "Production build"
+
+# SUCCESS CRITERIA
+success_criteria:
+  - "All 4 PDFs processed correctly"
+  - "15 steps executed in proper sequence"
+  - "All 9 indices calculated accurately"
+  - "Correlation generates meaningful insights"
+  - "PDF output matches requirements"
+  - "Slides output is presentation-ready"
+  - "System accessible (WCAG AA)"
+  - "Test coverage > 70%"
+  - "Performance < 3s per step"
+  - "Zero production errors (99.9% uptime)"
+
+# DEPENDENCIES & CONFLICTS
+dependencies:
+  external_libs:
+    - "pdfjs-dist": "^3.11.174"
+    - "pdf-parse": "^1.1.1"
+    - "pdfkit": "^0.13.0"
+    - "html2pdf.js": "^0.10.1"
+    - "pptxgen": "^3.12.0"
+    - "zod": "^3.22.0"
+
+  internal_services:
+    - "geminiService" (existing - can be replaced)
+    - "localStorage" (for persistence)
+
+# TIMELINE
+timeline:
+  sprint_1: "2026-02-10 (1h)"
+  sprint_2: "2026-02-10 (1.5h)"
+  sprint_3: "2026-02-10 (1h)"
+  total: "3 horas (MVP completo)"
+
+  milestone_1: "Types + UI Design + Test Strategy (30 min)"
+  milestone_2: "Services implementation (90 min)"
+  milestone_3: "Output + Final QA (60 min)"

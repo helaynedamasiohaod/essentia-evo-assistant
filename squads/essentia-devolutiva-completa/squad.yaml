@@ -1,0 +1,265 @@
+name: essentia-devolutiva-completa
+version: 1.0.0
+type: application
+status: active
+
+description: |
+  Sistema Completo de Devolutiva de Identidade EssentIA
+  Processa 4 PDFs (DISC, Âncoras, Forças, Linguagens) e gera
+  devolutiva estruturada em 15 passos com saída PDF e Slides
+
+author: "Helayne Damasio <haodhelaynedamasio@gmail.com>"
+created: "2026-02-10"
+updated: "2026-02-10"
+
+metadata:
+  project: essentia-evo-assistant
+  complexity: high
+  parallelization: true
+  estimated_hours: 3
+  team_size: 4
+  status: designing
+
+# Agents participating in this squad
+agents:
+  lead:
+    - id: dev
+      name: Dex (Builder)
+      role: "Backend Services Implementation"
+
+  contributors:
+    - id: ux-design-expert
+      name: Uma (Empathizer)
+      role: "Frontend UI/UX Design"
+
+    - id: qa
+      name: Quinn (Guardian)
+      role: "Quality Assurance & Testing"
+
+    - id: devops
+      name: Gage (Operator)
+      role: "CI/CD & Infrastructure"
+
+# Execution strategy
+execution:
+  mode: parallel
+  sprints: 3
+  sprint_duration: 1h
+  total_duration: 3h
+
+  tracks:
+    - name: "Backend Services"
+      lead: dev
+      focus: PDF processing, 15-step orchestration, index calculation, correlation
+
+    - name: "Frontend UI"
+      lead: ux-design-expert
+      focus: Component design, data visualization, accessibility
+
+    - name: "Quality & Testing"
+      lead: qa
+      focus: Test strategy, unit tests, integration tests
+
+    - name: "Infrastructure"
+      lead: devops
+      focus: CI/CD, build optimization, deployment
+
+# Key deliverables
+deliverables:
+  - name: "DevolutivaCompleta TypeScript Interface"
+    path: "src/types/devolutiva.ts"
+    owner: dev
+    sprint: 1
+
+  - name: "PDF Processing Service"
+    path: "src/services/pdfProcessingService.ts"
+    owner: dev
+    sprint: 2
+
+  - name: "15-Step Analysis Service"
+    path: "src/services/devolutivaAnalysisService.ts"
+    owner: dev
+    sprint: 2
+
+  - name: "Index Calculation Service"
+    path: "src/services/indexCalculationService.ts"
+    owner: dev
+    sprint: 2
+
+  - name: "Correlation Engine"
+    path: "src/services/correlationService.ts"
+    owner: dev
+    sprint: 2
+
+  - name: "PDF Output Generator"
+    path: "src/services/pdfOutputService.ts"
+    owner: dev
+    sprint: 3
+
+  - name: "Slides Output Generator"
+    path: "src/services/slidesOutputService.ts"
+    owner: dev
+    sprint: 3
+
+  - name: "UI Design & Component Specs"
+    path: "designs/15-step-flow.pdf"
+    owner: ux-design-expert
+    sprint: 1
+
+  - name: "PDF Upload Component"
+    path: "src/components/PDFUploadModal.tsx"
+    owner: ux-design-expert
+    sprint: 2
+
+  - name: "Step-by-Step Container"
+    path: "src/components/DevolutivaStepByStep.tsx"
+    owner: ux-design-expert
+    sprint: 2
+
+  - name: "Visualization Components"
+    path: "src/components/Visualizations.tsx"
+    owner: ux-design-expert
+    sprint: 2
+
+  - name: "Test Strategy Document"
+    path: "docs/qa/test-strategy.md"
+    owner: qa
+    sprint: 1
+
+  - name: "Service Unit Tests"
+    path: "src/__tests__/services/"
+    owner: qa
+    sprint: 2
+
+  - name: "Integration Tests"
+    path: "src/__tests__/integration/"
+    owner: qa
+    sprint: 3
+
+  - name: "GitHub Actions CI/CD"
+    path: ".github/workflows/"
+    owner: devops
+    sprint: 1
+
+  - name: "Deployment Configuration"
+    path: "vercel.json"
+    owner: devops
+    sprint: 3
+
+# Dependencies
+dependencies:
+  npm_packages:
+    - name: "pdfjs-dist"
+      version: "^3.11.174"
+      purpose: "PDF extraction and parsing"
+
+    - name: "pdfkit"
+      version: "^0.13.0"
+      purpose: "PDF generation"
+
+    - name: "html2pdf.js"
+      version: "^0.10.1"
+      purpose: "HTML to PDF conversion"
+
+    - name: "pptxgen"
+      version: "^3.12.0"
+      purpose: "PowerPoint slides generation"
+
+    - name: "zod"
+      version: "^3.22.0"
+      purpose: "Type-safe parsing validation"
+
+  internal_services:
+    - name: "geminiService"
+      type: "existing"
+      status: "can be replaced with mock or real API"
+
+  external_apis:
+    - name: "Google Gemini API"
+      optional: true
+      purpose: "Can be used for enhanced analysis"
+
+# Success criteria
+success_criteria:
+  functional:
+    - "✅ Upload 4 PDFs successfully"
+    - "✅ Extract data from all PDF types"
+    - "✅ Execute 15 steps in proper sequence"
+    - "✅ Calculate all 9 indices accurately"
+    - "✅ Generate meaningful correlations"
+    - "✅ Output PDF matching requirements"
+    - "✅ Output Slides presentation-ready"
+
+  quality:
+    - "✅ Test coverage > 70%"
+    - "✅ WCAG AA accessibility compliance"
+    - "✅ Performance < 3s per step"
+    - "✅ Zero console errors"
+
+  deployment:
+    - "✅ CI/CD pipeline passes all checks"
+    - "✅ Vercel deployment successful"
+    - "✅ Monitoring configured"
+    - "✅ Error tracking setup"
+
+# Directory structure
+structure:
+  - path: "squads/essentia-devolutiva-completa/"
+    description: "Squad root"
+
+  - path: "squads/essentia-devolutiva-completa/squad.yaml"
+    description: "Squad manifest (this file)"
+
+  - path: "squads/essentia-devolutiva-completa/README.md"
+    description: "Squad documentation"
+
+  - path: "squads/essentia-devolutiva-completa/config/"
+    description: "Configuration files"
+
+  - path: "squads/essentia-devolutiva-completa/agents/"
+    description: "Agent definitions (reference)"
+
+  - path: "squads/essentia-devolutiva-completa/tasks/"
+    description: "Task definitions"
+
+  - path: "squads/essentia-devolutiva-completa/workflows/"
+    description: "Multi-step workflows"
+
+  - path: "squads/essentia-devolutiva-completa/checklists/"
+    description: "Validation checklists"
+
+  - path: "squads/essentia-devolutiva-completa/templates/"
+    description: "Document templates"
+
+# Task-first architecture
+task_first:
+  principle: "Each component is driven by a clear, executable task"
+  benefits:
+    - "Clear ownership and accountability"
+    - "Easy to parallelize"
+    - "Measurable progress"
+    - "Easy to delegate"
+
+# Integration points
+integration:
+  with_existing_app:
+    - "Replaces/enhances existing UploadScreen"
+    - "Integrates with App.tsx state management"
+    - "Uses existing Sidebar navigation"
+
+  with_external_systems:
+    - "Optional: Gemini API for enhanced analysis"
+    - "Optional: File storage (S3, Vercel Blob)"
+
+# Next steps
+next_steps:
+  1: "Review and approve this blueprint"
+  2: "Activate @dev for backend implementation"
+  3: "Activate @ux-design-expert for UI design"
+  4: "Activate @qa for test strategy"
+  5: "Activate @devops for CI/CD setup"
+  6: "Execute Sprint 1 (foundations)"
+  7: "Execute Sprint 2 (implementation)"
+  8: "Execute Sprint 3 (output & finalization)"
+  9: "Integration & final testing"
+  10: "Deploy to production"
